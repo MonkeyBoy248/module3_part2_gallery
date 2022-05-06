@@ -3,10 +3,11 @@ import { galleryConfig } from './config/serverless/parts/galleryConfig/gallery';
 import { restApiCorsConfig } from './config/serverless/parts/rest-api-cors';
 import { joinParts } from './config/serverless/utils';
 import { authConfig } from "./config/serverless/parts/authConfig/auth";
+import {usersTableConfig} from "./config/serverless/parts/tables/users.table";
 
 const CLIENT = '${file(./env.yml):${self:provider.stage}.CLIENT}';
 const SERVICE_NAME = `template-sls`;
-const STAGE = '${opt:stage, "local"}';
+const STAGE = '${opt:stage, "dev"}';
 const REGION = '${file(./env.yml):${self:provider.stage}.REGION}';
 const PROFILE = '${file(./env.yml):${self:provider.stage}.PROFILE}';
 
@@ -62,7 +63,7 @@ const masterConfig: AWS = {
     envFiles: ['env.yml'],
     envEncryptionKeyId: {
       local: '${file(./kms_key.yml):local}',
-      //dev: '${file(./kms_key.yml):dev}',
+      dev: '${file(./kms_key.yml):dev}',
       //test: '${file(./kms_key.yml):test}',
       //prod: '${file(./kms_key.yml):prod}',
     },
@@ -82,7 +83,8 @@ const masterConfig: AWS = {
 };
 
 module.exports = joinParts(masterConfig, [
-  restApiCorsConfig,
+  // restApiCorsConfig,
   galleryConfig,
-  authConfig
+  authConfig,
+  usersTableConfig
 ]);
