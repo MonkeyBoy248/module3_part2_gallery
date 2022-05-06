@@ -141,7 +141,7 @@ It is a skeleton for your AWS + Serverless applications.
       - feature.ts - TypeScript file for description Lambda functions with their triggers for one feature
       - rest-api-cors.ts - Helper for setting up CORS for REST API
       - jobs.ts - TypeScript file for description of DynamoDB table
-      - users.ts - TypeScript file for description of DynamoDB table
+      - users.table.ts - TypeScript file for description of DynamoDB table
     - cf-intristic-fn.ts - Helper with function for CloudFormation
     - types.ts - Types for Serverless configurations
     - utils.ts - Helper for Serverless configurations
