@@ -38,21 +38,21 @@ export const usersTableConfig: AWSPartitial = {
         Properties: {
           AttributeDefinitions: [
             {
-              AttributeName: 'Partition Key: Email',
+              AttributeName: 'PK',
               AttributeType: 'S'
             },
             {
-              AttributeName: 'Sort Key: PictureName',
+              AttributeName: 'SK',
               AttributeType: 'S'
             },
           ],
           KeySchema: [
             {
-              AttributeName: 'Partition Key: Email',
+              AttributeName: 'PK',
               KeyType: 'HASH',
             },
             {
-              AttributeName: 'Sort Key: PictureName',
+              AttributeName: 'SK',
               KeyType: 'RANGE',
             },
           ],
