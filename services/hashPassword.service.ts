@@ -2,7 +2,7 @@ import crypto from 'crypto';
 import { promisify } from "util";
 import { HttpUnauthorizedError } from "@floteam/errors";
 
-interface HashedPassword {
+export interface HashedPassword {
   hash: string,
   salt: string
 }
