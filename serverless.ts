@@ -1,12 +1,12 @@
 import type { AWS } from '@serverless/typescript';
 import { galleryConfig } from './config/serverless/parts/galleryConfig/gallery';
-import { restApiCorsConfig } from './config/serverless/parts/rest-api-cors';
 import { joinParts } from './config/serverless/utils';
 import { authConfig } from "./config/serverless/parts/authConfig/auth";
 import {usersTableConfig} from "./config/serverless/parts/tables/users.table";
+import {picturesBucket} from "./config/serverless/parts/buckets/pictures.bucket";
 
 const CLIENT = '${file(./env.yml):${self:provider.stage}.CLIENT}';
-const SERVICE_NAME = `template-sls`;
+const SERVICE_NAME = `dev-template-sls-Kirill`;
 const STAGE = '${opt:stage, "dev"}';
 const REGION = '${file(./env.yml):${self:provider.stage}.REGION}';
 const PROFILE = '${file(./env.yml):${self:provider.stage}.PROFILE}';
@@ -15,7 +15,7 @@ const masterConfig: AWS = {
   service: SERVICE_NAME,
   configValidationMode: 'warn',
   variablesResolutionMode: '20210326',
-  // unresolvedVariablesNotificationMode: 'error',
+  unresolvedVariablesNotificationMode: 'error',
   provider: {
     name: 'aws',
     runtime: 'nodejs14.x',
@@ -83,8 +83,8 @@ const masterConfig: AWS = {
 };
 
 module.exports = joinParts(masterConfig, [
-  // restApiCorsConfig,
   galleryConfig,
   authConfig,
-  usersTableConfig
+  usersTableConfig,
+  picturesBucket
 ]);
