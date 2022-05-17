@@ -20,15 +20,11 @@ export class AuthManager {
     return this.service.logIn(user);
   }
 
-  uploadDefaultUsers = async () => {
-    return this.service.uploadDefaultUsers();
-  }
-
   authenticate = async (token: string) => {
-    if (!token) {
+    try {
+      return this.service.authenticate(token);
+    } catch {
       throw new HttpUnauthorizedError('No token was provided');
     }
-
-    return this.service.authenticate(token);
   }
 }

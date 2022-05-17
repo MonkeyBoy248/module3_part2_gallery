@@ -5,12 +5,14 @@ import {
 } from "aws-lambda";
 import { AuthManager } from "./auth.manager";
 import { APIGatewayAuthorizerSimpleResult, APIGatewayRequestAuthorizerHttpApiPayloadV2Event } from "@interfaces/api-gateway-authorizer.interface";
+import {JwtPayload} from "jsonwebtoken";
+
+const manager = new AuthManager();
 
 export const signUp: APIGatewayProxyHandlerV2 = async (event, context) => {
   console.log(event);
 
   try {
-    const manager = new AuthManager();
     const user = event.body!;
 
     const response = await manager.signUp(user);
@@ -25,9 +27,7 @@ export const logIn: APIGatewayProxyHandlerV2 = async (event, context) => {
   console.log(event);
 
   try {
-    const manager = new AuthManager();
     const user = event.body!
-
     const token = await manager.logIn(user);
 
     return createResponse(200, { token });
@@ -36,18 +36,6 @@ export const logIn: APIGatewayProxyHandlerV2 = async (event, context) => {
   }
 }
 
-export const uploadDefaultUsers: APIGatewayProxyHandlerV2 = async (event, context) => {
-  console.log(event)
-
-  try {
-    const manager = new AuthManager();
-    const response = await manager.uploadDefaultUsers();
-
-    return createResponse(200, response);
-  } catch (err) {
-    return errorHandler(err);
-  }
-}
 
 export function generateSimpleResponse<C extends APIGatewayAuthorizerSimpleResult['context']>(
   isAuthorized: boolean,
@@ -68,12 +56,11 @@ export const authenticate: Handler<
   console.log(event);
 
   try {
-    const manager = new AuthManager();
     const token = event.identitySource?.[0]
 
     console.log('token', token);
 
-    const user = await manager.authenticate(token!);
+    const user = await manager.authenticate(token!) as JwtPayload;
 
     return generateSimpleResponse(true, {email: user.email});
   } catch (err) {
