@@ -1,4 +1,4 @@
-import {DynamoDBClient} from "@aws-sdk/client-dynamodb";
+import {DynamoDBClient, GetItemCommand} from "@aws-sdk/client-dynamodb";
 import {
   DynamoDBDocumentClient, GetCommand,
   GetCommandInput,
@@ -21,6 +21,7 @@ interface ExpressionAttributeValue {
   [value: string]: unknown;
 }
 
+
 export class DynamoDBService {
   private readonly dynamoClient: DynamoDBClient;
   private dynamoDocumentClient: DynamoDBDocumentClient;
@@ -36,19 +37,21 @@ export class DynamoDBService {
     };
     const translateConfig: TranslateConfig = {marshallOptions, unmarshallOptions};
 
-   this.dynamoClient = new DynamoDBClient({region: getEnv('REGION')});
-   this.dynamoDocumentClient = DynamoDBDocumentClient.from(this.dynamoClient, translateConfig);
+    console.log(getEnv('REGION'));
+    this.dynamoClient = new DynamoDBClient({region: getEnv('REGION')});
+    this.dynamoDocumentClient = DynamoDBDocumentClient.from(this.dynamoClient, translateConfig);
   }
 
   putItem = async (tableName: string, partitionKey: string, sortKey: string, attributes: Attributes) => {
     const params: PutCommandInput = {
       TableName: tableName,
       Item: {
-        partitionKey,
-        sortKey,
+        PK: partitionKey,
+        SK: sortKey,
         ...attributes
       }
     }
+
     return this.dynamoDocumentClient.send(new PutCommand(params))
   }
 
@@ -56,8 +59,8 @@ export class DynamoDBService {
     const params: GetCommandInput = {
       TableName: tableName,
       Key: {
-        partitionKey,
-        sortKey
+        PK: partitionKey,
+        SK: sortKey
       }
     }
 
