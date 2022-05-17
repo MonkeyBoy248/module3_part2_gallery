@@ -39,11 +39,11 @@ export const usersTableConfig: AWSPartitial = {
           AttributeDefinitions: [
             {
               AttributeName: 'PK',
-              AttributeType: 'S'
+              AttributeType: 'S',
             },
             {
               AttributeName: 'SK',
-              AttributeType: 'S'
+              AttributeType: 'S',
             },
           ],
           KeySchema: [
@@ -58,43 +58,19 @@ export const usersTableConfig: AWSPartitial = {
           ],
           // GlobalSecondaryIndexes: [
           //   {
-          //     IndexName: 'ProducerIdGlobalIndex',
+          //     IndexName: 'InvertedIndexes',
           //     KeySchema: [
           //       {
-          //         AttributeName: 'Partition Key: PK',
+          //         AttributeName: 'sortKey',
           //         KeyType: 'HASH',
           //       },
           //       {
-          //         AttributeName: 'Sort Key: SK',
+          //         AttributeName: 'primaryKey',
           //         KeyType: 'RANGE',
           //       },
           //     ],
           //     Projection: {
           //       ProjectionType: 'ALL',
-          //     },
-          //     ProvisionedThroughput: {
-          //       ReadCapacityUnits: 2,
-          //       WriteCapacityUnits: 2,
-          //     },
-          //   },
-          //   {
-          //     IndexName: 'CrewIdGlobalIndex',
-          //     KeySchema: [
-          //       {
-          //         AttributeName: 'crewId',
-          //         KeyType: 'HASH',
-          //       },
-          //       {
-          //         AttributeName: 'status',
-          //         KeyType: 'RANGE',
-          //       },
-          //     ],
-          //     Projection: {
-          //       ProjectionType: 'ALL',
-          //     },
-          //     ProvisionedThroughput: {
-          //       ReadCapacityUnits: 2,
-          //       WriteCapacityUnits: 2,
           //     },
           //   },
           // ],
@@ -110,10 +86,10 @@ export const usersTableConfig: AWSPartitial = {
   custom: {
     tablesNames: {
       UsersTable: {
-        local: 'Users-pictures-local',
-        dev: 'Users-pictures-dev',
-        test: 'Users-pictures-test',
-        prod: 'Users-pictures',
+        local: 'Kirill-Users-local',
+        dev: 'Kirill-Users-dev',
+        test: 'Kirill-Users-test',
+        prod: 'Kirill-Users',
       },
     },
   },
