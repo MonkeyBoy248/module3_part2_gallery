@@ -6,16 +6,21 @@ import { MultipartFile } from 'lambda-multipart-parser'
 import { FileService } from "@services/file.service";
 import { UserDBService } from "@models/MongoDB/services/userDB.service";
 import { HttpBadRequestError, HttpInternalServerError } from "@floteam/errors";
+import {S3Service} from "@services/S3.service";
+import {getEnv} from "@helper/environment";
 
 export class GalleryService {
   private fileService;
   private dbUsersService;
   private dbPicturesService;
+  private s3Service;
+  private picturesBucketName = getEnv('BUCKET_NAME');
 
   constructor() {
     this.fileService = new FileService();
     this.dbPicturesService = new PicturesDBService();
     this.dbUsersService = new UserDBService();
+    this.s3Service = new S3Service();
   }
 
   validateAndConvertParams = async (page: string, limit: string, filter: string, email: string) => {
@@ -78,30 +83,10 @@ export class GalleryService {
     }
   }
 
-  uploadUserPicture = async (file: MultipartFile, email: string) => {
-    try {
-      await mongoConnectionService.connectDB();
+  createPreSignedUploadLink = () => {
+    const pictureName = `userImage_${Math.random() * 100}`;
 
-      const user = await this.dbUsersService.findUserByEmail(email);
-
-
-      const picturesAmount = await this.dbPicturesService.getTotalImagesAmount();
-      const pictureName = await this.fileService.saveFileWithANewName(file, picturesAmount);
-      const picturesInfo = await this.fileService.getFilesInfo();
-      const pictureMetadata = picturesInfo.metadata[picturesAmount - 1];
-
-      const pictureObject: Picture = {
-        path: pictureName!,
-        metadata: pictureMetadata,
-        owner: user._id,
-      }
-
-      await this.dbPicturesService.savePicturesToTheDB(pictureObject);
-
-      return {object: pictureObject};
-    } catch (err) {
-      throw new HttpInternalServerError('Failed to upload a new picture');
-    }
+    return this.s3Service.getPreSignedPutUrl(pictureName, this.picturesBucketName);
   }
 
   uploadDefaultPictures = async () => {

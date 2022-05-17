@@ -1,6 +1,6 @@
 import {HashedPassword, HashPasswordService} from '@services/hashPassword.service'
 import {AlreadyExistsError} from "@floteam/errors";
-import {DynamoDBService} from "@models/DynamoDB/services/DynamoDB.service";
+import {DynamoDBService} from "@models/DynamoDB/services/dynamoDB.service";
 import {getEnv} from "@helper/environment";
 import {createKeyTemplate} from "@helper/keyTemplate";
 
