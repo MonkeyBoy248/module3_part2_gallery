@@ -2,8 +2,9 @@ import {DynamoDBService} from "@models/DynamoDB/services/dynamoDB.service";
 import {createKeyTemplate} from "@helper/keyTemplate";
 import {getEnv} from "@helper/environment";
 import {HashedPassword} from "@services/hashPassword.service";
+import {PictureMetadata} from "../../../api/gallery/gallery.service";
 
-interface PictureResponse {
+export interface PictureResponse {
   partitionKey: string,
   sortKey: string,
   email: string,
@@ -12,13 +13,21 @@ interface PictureResponse {
   status: string;
 }
 
-class DynamoDBPicturesService {
+export class DynamoDBPicturesService {
   private dynamoDBService = new DynamoDBService();
-  private userPicturesTableName = getEnv('USERS_TABLE_NAME');
+  private userTableName = getEnv('USERS_TABLE_NAME');
   private userPrefix = getEnv('USER_PREFIX');
-  private profilePrefix = getEnv('PROFILE_PREFIX');
+  private imagePrefix = getEnv('IMAGE_PREFIX');
 
-  createPictureObjectInDB = () => {
+  createPictureObjectInDB = async (email: string, metadata: PictureMetadata) => {
+    const partitionKey = createKeyTemplate(this.userPrefix, email);
+    const sortKey = createKeyTemplate(this.imagePrefix, metadata.name);
+    const attributes = {
+      email,
+      metadata,
+      dateOfUploading: new Date().toLocaleDateString()
+    }
 
+    await this.dynamoDBService.putItem(this.userTableName, partitionKey, sortKey, attributes)
   }
 }

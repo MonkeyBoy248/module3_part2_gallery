@@ -14,6 +14,7 @@ const galleryErrorContainer = document.querySelector('.gallery__error') as HTMLE
 const galleryPopup = document.querySelector('.gallery__error-pop-up') as HTMLElement;
 const galleryLinkTemplate = document.querySelector('.gallery__link-template') as HTMLTemplateElement;
 const galleryUploadForm = document.querySelector('.header__upload-form') as HTMLFormElement;
+const uploadWrapper = document.querySelector('.header__upload-wrapper') as HTMLElement;
 const galleryUploadLabel = galleryUploadForm.querySelector('.header__upload-label') as HTMLElement;
 const galleryUploadInput = galleryUploadForm.querySelector('.header__upload-input') as HTMLInputElement;
 const headerLimitInput = document.querySelector('.header__limit-input') as HTMLInputElement;
@@ -42,7 +43,7 @@ interface Metadata {
 interface PictureDimensions extends Pick<Metadata, 'dimensions'>{}
 
 
-//checkTokenValidity();
+checkTokenValidity();
 
 async function getPicturesData (): Promise<void>{
   const url = setCurrentPageUrl();
@@ -89,7 +90,7 @@ async function getPicturesData (): Promise<void>{
           const nonexistentPageNumber = new URL(url).searchParams.get('page');
 
           createErrorMessageTemplate(
-            `There is no page with number ${nonexistentPageNumber}.`, 
+            `There is no page with number ${nonexistentPageNumber}.`,
             'wrong-page-number',
             'page 1'
           )
@@ -109,27 +110,43 @@ function validateFileType (file: File) {
  return file.type.startsWith('image/');
 }
 
-async function sendUserPicture () {
-  const url = env.galleryServerUrl;
+async function retrieveUploadLink (file: File) {
+  const url = env.uploadPictureServerUrl;
   const tokenObject = Token.getToken();
   const tokenProperty = tokenObject?.token;
-  const data = new FormData();
-
-  const file = galleryUploadInput.files![0];
-
-  if (!validateFileType(file)) {
-    return false;
-  }
-
-  data.append('file', file);
+  const metadata = await getFileMetadata(file);
 
   try {
     const response = await fetch(url, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${tokenProperty}`
+        'Authorization': tokenProperty,
       },
-      body: data
+      body: JSON.stringify(metadata)
+    })
+
+    const link = await response.json();
+    console.log('link', link);
+
+    return link;
+  } catch (err) {
+    console.log(err);
+  }
+}
+
+async function sendUserPicture () {
+  const file = galleryUploadInput.files![0];
+  const url = await retrieveUploadLink(file);
+
+  if (!validateFileType(file)) {
+    return false;
+  }
+
+
+  try {
+    const response = await fetch(url, {
+      method: 'PUT',
+      body: file
     })
 
 
@@ -139,10 +156,29 @@ async function sendUserPicture () {
       throw new PicturesUploadError();
     }
 
-    await getPicturesData();
+    messageFactory(uploadWrapper, document.createElement('p'), 'header__upload-status','Picture was uploaded!')
+
+    setTimeout(clearUploadMessage, 3000);
+    //await getPicturesData();
+
   } catch (err) {
-    console.log('Failed');
+    messageFactory(uploadWrapper, document.createElement('p'), 'header__upload-status','Uploading failed');
+
+    setTimeout(clearUploadMessage, 3000);
   }
+}
+
+function messageFactory (container: HTMLElement, element: HTMLElement, className: string, messageText: string) {
+  element.className = className;
+  element.textContent = messageText;
+
+  container.append(element);
+}
+
+function clearUploadMessage () {
+  const message = uploadWrapper.querySelector('.header__upload-status') as HTMLElement;
+
+  message.innerHTML = '';
 }
 
 async function getFileMetadata (file: File) {
@@ -150,6 +186,8 @@ async function getFileMetadata (file: File) {
   const extension = file.type
   const size = file.size;
   const {dimensions} = await getPictureParams(file);
+
+  console.log(name, extension, size, dimensions);
 
   return {
     name,
@@ -375,7 +413,7 @@ function setCurrentPageUrl (): string {
   const pageNumber = env.currentUrl.searchParams.get('page') || '1';
   const filter = env.currentUrl.searchParams.get('filter') || 'false';
 
-  return `${env.galleryServerUrl}?page=${pageNumber}&limit=${limit}&filter=${filter}`;
+  return `${env.galleryUrl}?page=${pageNumber}&limit=${limit}&filter=${filter}`;
 }
 
 async function changeCurrentPage (e: Event): Promise<void> {
@@ -390,7 +428,7 @@ async function changeCurrentPage (e: Event): Promise<void> {
       env.currentUrl.searchParams.set('page', targetClosestLi?.getAttribute('page-number')!)
       setNewUrl();
       await getPicturesData();
-      
+
       currentActiveLink?.classList.remove('active');
       target.classList.add('active');
     }
@@ -415,7 +453,6 @@ galleryUploadForm.addEventListener('submit', uploadUserFile);
 galleryUploadInput.addEventListener('change', processFileInfo);
 setLimitButton.addEventListener('click', setLimit);
 filterCheckbox.addEventListener('change', addFilterValueToURL);
-
 
 
 

@@ -8,12 +8,14 @@ import {
 } from "@aws-sdk/lib-dynamodb";
 import {getEnv} from "@helper/environment";
 import {HashedPassword} from "@services/hashPassword.service";
-import {Stats} from "fs";
+import {PictureMetadata} from "../../../api/gallery/gallery.service";
 
 interface Attributes {
   email?: string,
   password?: HashedPassword,
-  metadata?: Stats,
+  metadata?: PictureMetadata,
+  dateOfRegistration?: string,
+  dateOfUploading?: string,
   status?: string
 }
 
