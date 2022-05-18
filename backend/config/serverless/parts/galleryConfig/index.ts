@@ -1,5 +1,5 @@
 export const getPictures =  {
-  handler: 'api/gallery/handler.createResponseObject',
+  handler: 'api/gallery/handler.getPictures',
     description: 'Return object with information about the page: array of images, total pages amount, current page number',
     timeout: 30,
     memorySize: 128,
@@ -17,7 +17,7 @@ export const getPictures =  {
 };
 
 export const uploadPicture = {
-  handler: 'api/gallery/handler.createPreSignedUploadLink',
+  handler: 'api/gallery/handler.uploadPicture',
     description: 'Send private upload link',
     timeout: 30,
     memorySize: 128,

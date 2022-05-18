@@ -7,16 +7,20 @@ export class GalleryManager {
     this.service = new GalleryService();
   }
 
-  // createResponseObject = async (page: string,  limit: string, filter: string, email: string) => {
-  //   const queryParams = await this.service.validateAndConvertParams(page, limit, filter, email);
-  //
-  //   return this.service.createResponseObject(queryParams.page, queryParams.limit, queryParams.filter, email);
-  // }
+  getPictures = async (page: string,  limit: string, filter: string, email: string) => {
+    try {
+      const queryParams = await this.service.validateAndConvertParams(page, limit, filter, email);
 
-  createPreSignedUploadLink = async (data: string, email: string) => {
+      return this.service.getPictures(queryParams.page, queryParams.limit, queryParams.filter, email);
+    } catch {
+      return this.service.getPictures(1, 3, false, email);
+    }
+  }
+
+  uploadPicture = async (data: string, email: string) => {
     const metadata = JSON.parse(data);
 
-    return this.service.createPreSignedUploadLink(email, metadata);
+    return this.service.uploadPicture(email, metadata);
   }
 
   // uploadDefaultPictures = async () => {

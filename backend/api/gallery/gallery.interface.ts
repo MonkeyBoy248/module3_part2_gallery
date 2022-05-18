@@ -1,7 +1,5 @@
-import { Picture } from "@interfaces/picture.interface";
-
 export interface GalleryObject {
-  objects: Picture[];
+  objects: string[];
   page: number;
   total: number;
 }
