@@ -1,7 +1,7 @@
 export const getPictures =  {
   handler: 'api/gallery/handler.createResponseObject',
     description: 'Return object with information about the page: array of images, total pages amount, current page number',
-    timeout: 6,
+    timeout: 30,
     memorySize: 128,
     events: [
     {
@@ -17,14 +17,14 @@ export const getPictures =  {
 };
 
 export const uploadPicture = {
-  handler: 'api/gallery/handler.uploadUserPicture',
-    description: 'Upload user picture to the server',
-    timeout: 6,
+  handler: 'api/gallery/handler.createPreSignedUploadLink',
+    description: 'Send private upload link',
+    timeout: 30,
     memorySize: 128,
     events: [
     {
       httpApi: {
-        path: '/gallery/upload-user-picture',
+        path: '/gallery/upload-picture',
         method: 'post',
         authorizer: {
           name: 'httpApiJwtAuthorizer'
@@ -37,7 +37,7 @@ export const uploadPicture = {
 export const uploadDefaultPictures = {
   handler: 'api/gallery/handler.uploadDefaultPictures',
     description: 'Upload default pictures to the DB',
-    timeout: 6,
+    timeout: 30,
     memorySize: 128,
     events: [
     {
