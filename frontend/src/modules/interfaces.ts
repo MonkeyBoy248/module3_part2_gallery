@@ -15,7 +15,7 @@ interface Pictures {
 }
 
 export interface GalleryData {
-  objects: Pictures[];
+  objects: string[];
   page: number;
   total: number;
 }
