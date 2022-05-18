@@ -49,13 +49,14 @@ async function getPicturesData (): Promise<void>{
   const url = setCurrentPageUrl();
   const tokenObject = Token.getToken();
   const tokenProperty = tokenObject?.token;
+  const emptyGalleryMessage = document.querySelector('.gallery__empty-message') as HTMLElement;
 
   if (tokenObject) {
     try {
       const response = await fetch(url, {
         method: 'GET',
         headers: {
-          Authorization: `Bearer ${tokenProperty}`,
+          Authorization: tokenProperty,
         },
       })
 
@@ -66,11 +67,16 @@ async function getPicturesData (): Promise<void>{
       }
 
 
-      if (response.status === 404) {
+      if (response.status === 404 || response.status === 400) {
         throw new InvalidPageError();
       }
-
       const data: GalleryData = await response.json();
+
+      console.log('data', data);
+
+      if (emptyGalleryMessage !== null) {
+        emptyGalleryMessage.remove();
+      }
 
       if (data.objects.length === 0) {
         const noPicturesMessage = document.createElement('p');
@@ -156,29 +162,11 @@ async function sendUserPicture () {
       throw new PicturesUploadError();
     }
 
-    messageFactory(uploadWrapper, document.createElement('p'), 'header__upload-status','Picture was uploaded!')
-
-    setTimeout(clearUploadMessage, 3000);
-    //await getPicturesData();
+    await getPicturesData();
 
   } catch (err) {
-    messageFactory(uploadWrapper, document.createElement('p'), 'header__upload-status','Uploading failed');
-
-    setTimeout(clearUploadMessage, 3000);
+    console.log(err);
   }
-}
-
-function messageFactory (container: HTMLElement, element: HTMLElement, className: string, messageText: string) {
-  element.className = className;
-  element.textContent = messageText;
-
-  container.append(element);
-}
-
-function clearUploadMessage () {
-  const message = uploadWrapper.querySelector('.header__upload-status') as HTMLElement;
-
-  message.innerHTML = '';
 }
 
 async function getFileMetadata (file: File) {
@@ -251,7 +239,7 @@ function createPictureTemplate (pictures: GalleryData): void {
     const imageWrapper = picture.children[0];
     const image = imageWrapper.querySelector('.gallery__img') as HTMLElement;
     
-    image.setAttribute('src', `http://localhost:8000/api_images/${object.path}`);
+    image.setAttribute('src', object);
     galleryPhotos.insertAdjacentElement('beforeend', imageWrapper);
   }
 }
@@ -338,7 +326,7 @@ function setNewUrl (): void {
   const limit = env.currentUrl.searchParams.get('limit') || '4';
   const filter = env.currentUrl.searchParams.get('filter') || 'false';
 
-  window.location.href = `${env.protocol}://${env.hostName}:${env.port}/${env.galleryUrl}?page=${pageNumber}&limit=${limit}&filter=${filter}`;
+  window.location.href = `${env.galleryUrl}?page=${pageNumber}&limit=${limit}&filter=${filter}`;
 }
 
 function showMessage (text: string): void {
@@ -413,7 +401,7 @@ function setCurrentPageUrl (): string {
   const pageNumber = env.currentUrl.searchParams.get('page') || '1';
   const filter = env.currentUrl.searchParams.get('filter') || 'false';
 
-  return `${env.galleryUrl}?page=${pageNumber}&limit=${limit}&filter=${filter}`;
+  return `${env.galleryServerUrl}?page=${pageNumber}&limit=${limit}&filter=${filter}`;
 }
 
 async function changeCurrentPage (e: Event): Promise<void> {
@@ -446,7 +434,7 @@ function setCurrentCheckboxValue () {
   filterCheckbox.checked = env.currentUrl.searchParams.get('filter') !== 'false';
 }
 
-//document.addEventListener('DOMContentLoaded', getPicturesData);
+document.addEventListener('DOMContentLoaded', getPicturesData);
 pagesLinksList.addEventListener('click', changeCurrentPage);
 galleryErrorContainer.addEventListener('click', redirectToTheTargetPage);
 galleryUploadForm.addEventListener('submit', uploadUserFile);
