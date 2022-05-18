@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "scripts": {
     "deploy:dev": "cd backend && npm run deploy:dev",
-    "build:front": "cd ./frontend && tsc"
+    "build:front": "cd frontend && tsc",
+    "remove": "cd backend && npm run serverless:remove"
   },
   "repository": {
     "type": "git",

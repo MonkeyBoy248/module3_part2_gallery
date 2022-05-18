@@ -15,6 +15,7 @@
     "sls:print:dev": "sls print --stage dev --config serverless.ts",
     "sls:print:test": "sls print --stage dev --config serverless.ts",
     "sls:print:prod": "sls print --stage prod --config serverless.ts",
+    "serverless:remove": "serverless remove --stage dev --region us-east-1",
     "lint": "eslint . --ext .ts",
     "format": "prettier --write .",
     "test": "jest --watchAll --colors --coverage",
