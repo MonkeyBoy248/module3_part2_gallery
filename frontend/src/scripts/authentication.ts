@@ -1,5 +1,5 @@
 import { CustomEventListener, ListenerRemover } from "../modules/custom_event_listener.js";
-import {authenticationServerUrl, signUpServerUrl} from "../modules/environment_variables.js";
+import {logInServerUrl, signUpServerUrl} from "../modules/environment_variables.js";
 import { InvalidUserDataError } from "../modules/errors.js";
 import { redirectToTheGalleryPage } from "../modules/gallery_redirection.js";
 import { TokenObject, User } from "../modules/interfaces.js";
@@ -47,7 +47,7 @@ function getFormData (): User {
 }
 
 async function sendFormData() {
-  const url = authenticationServerUrl;
+  const url = logInServerUrl;
   const user = getFormData();
 
   const response = await fetch(url, {

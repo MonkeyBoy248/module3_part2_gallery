@@ -15,14 +15,14 @@ interface UserResponse {
 export class DynamoDBUserService {
   private hashService = new HashPasswordService();
   private dynamoDBService = new DynamoDBService();
-  private userPicturesTableName = getEnv('USERS_TABLE_NAME');
+  private userTableName = getEnv('USERS_TABLE_NAME');
   private userPrefix = getEnv('USER_PREFIX');
   private profilePrefix = getEnv('PROFILE_PREFIX');
 
   getUserByEmail = async (email: string) => {
     const partitionKey = createKeyTemplate(this.userPrefix!, email);
     const sortKey = createKeyTemplate(this.profilePrefix!, email);
-    const user = await this.dynamoDBService.getItem(this.userPicturesTableName!, partitionKey, sortKey);
+    const user = await this.dynamoDBService.getItem(this.userTableName!, partitionKey, sortKey);
 
     return user.Item as UserResponse;
   }
@@ -43,6 +43,6 @@ export class DynamoDBUserService {
      dateOfRegistration: new Date().toLocaleDateString(),
    }
 
-   await this.dynamoDBService.putItem(this.userPicturesTableName!, partitionKey, sortKey, attributes);
+   await this.dynamoDBService.putItem(this.userTableName!, partitionKey, sortKey, attributes);
   }
 }
