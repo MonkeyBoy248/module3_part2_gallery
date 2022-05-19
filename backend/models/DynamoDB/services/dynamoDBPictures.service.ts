@@ -45,7 +45,8 @@ export class DynamoDBPicturesService {
     }
 
     try {
-      const pictures = !indexName ?
+      const pictures = !indexName
+        ?
         await this.dynamoDBService.queryItems(this.userTableName, keyConditionExpression, expressionAttributeValues)
         :
         await this.dynamoDBService.queryItems(this.userTableName, keyConditionExpression, expressionAttributeValues, indexName);
