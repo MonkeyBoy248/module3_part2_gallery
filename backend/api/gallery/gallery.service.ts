@@ -65,12 +65,15 @@ export class GalleryService {
 
   private createResponseObject = async (array: OriginInfo[], limit: number, page: number, email: string) => {
     const isSingleKind = singleKindOfElementCheck(array, 'email');
+    const picturesForTargetPage = array!.slice((page - 1) * limit, page * limit);
+
+    console.log('target page', picturesForTargetPage, page, limit);
 
     return Promise.all(
-      array!.slice((page - 1) * limit, page * limit).map((picture, index) => {
+      picturesForTargetPage.map((picture, index) => {
           const checkPattern: boolean = isSingleKind && array.find((item) => item.email === email) !== undefined;
 
-          return this.s3Service.getPreSignedGetUrl(`${checkPattern ? email : array[index].email}/${checkPattern ? picture.name : array[index].name}`, this.picturesBucketName)
+          return this.s3Service.getPreSignedGetUrl(`${checkPattern ? email : picturesForTargetPage[index].email}/${checkPattern ? picture.name : picturesForTargetPage[index].name}`, this.picturesBucketName)
         }))
   }
 
