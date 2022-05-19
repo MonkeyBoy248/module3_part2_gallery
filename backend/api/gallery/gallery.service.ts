@@ -1,11 +1,10 @@
 import {DynamoDBPicturesService, PictureResponse} from "@models/DynamoDB/services/dynamoDBPictures.service";
 import { GalleryObject, QueryObject } from "./gallery.interface";
-import {HttpBadRequestError, HttpInternalServerError, HttpUnprocessableEntityError} from "@floteam/errors";
+import {HttpBadRequestError, HttpInternalServerError} from "@floteam/errors";
 import {S3Service} from "@services/S3.service";
 import {getEnv} from "@helper/environment";
 import {v4 as uuidv4} from "uuid";
 import {singleKindOfElementCheck} from "@helper/checkDuplicates";
-import {HttpError} from "@floteam/errors/http/http-error";
 
 export interface PictureMetadata {
   name: string,
@@ -64,15 +63,14 @@ export class GalleryService {
     }
   }
 
-  private createResponseObject = async (array: PictureResponse[], limit: number, page: number, email: string, originInfo: OriginInfo[]) => {
+  private createResponseObject = async (array: OriginInfo[], limit: number, page: number, email: string) => {
     const isSingleKind = singleKindOfElementCheck(array, 'email');
-    const picturesForTargetPage = array!.slice((page - 1) * limit, page * limit);
 
     return Promise.all(
-      picturesForTargetPage.map((picture, index) => {
-          const checkPattern: boolean = isSingleKind && originInfo.find((item) => item.email === email) !== undefined;
+      array!.slice((page - 1) * limit, page * limit).map((picture, index) => {
+          const checkPattern: boolean = isSingleKind && array.find((item) => item.email === email) !== undefined;
 
-          return this.s3Service.getPreSignedGetUrl(`${checkPattern ? email : originInfo[index].email}/${checkPattern ? picture.name : originInfo[index].name}`, this.picturesBucketName)
+          return this.s3Service.getPreSignedGetUrl(`${checkPattern ? email : array[index].email}/${checkPattern ? picture.name : array[index].name}`, this.picturesBucketName)
         }))
   }
 
@@ -88,7 +86,7 @@ export class GalleryService {
       });
       console.log('origin', originInfo);
       const total = picturesInfo.total;
-      const objects = total !== 0 ? await this.createResponseObject(pictures!, limit, page, email, originInfo) : [];
+      const objects = total !== 0 ? await this.createResponseObject(originInfo!, limit, page, email) : [];
 
       console.log('objects', objects);
 
