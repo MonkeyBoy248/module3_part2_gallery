@@ -32,8 +32,9 @@ export class AuthService {
   signUp = async (userData: RequestUser) => {
     try {
       await this.dbUserService.createUserObjectInDB(userData.email, userData.password);
+      const token = await this.logIn(userData);
 
-      return {message: 'User successfully added'}
+      return {token}
     } catch (err) {
       throw new AlreadyExistsError(`User with this email already exists, ${err}`)
     }
