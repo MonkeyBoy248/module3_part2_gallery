@@ -1,8 +1,12 @@
-# AWS + Serverless API for your application
+# MODULE-3-PART-2-Gallery
 
-## Project information
+## Usage
 
-It is a skeleton for your AWS + Serverless applications.
+1. Go to **backend** directory and run the ``npm i`` to install all necessary dependencies;
+2. Return to the root folder and  run the ``npm run deploy:dev`` command;
+3. Run the ``npm run build:front`` command;
+4. Open the ``index.html`` file using the extension in your IDE (**LiveServer** in **VSCode** or native local server in **WebStorm**).
+
 
 ## NPM commands
 
@@ -15,6 +19,7 @@ It is a skeleton for your AWS + Serverless applications.
 - **sls:print:dev**: print sls config for dev stage
 - **sls:print:test**: print sls config for test test
 - **sls:print:prod**: print sls config for prod test
+- **serverless:remove**: remove the deployed service, defined in your current working directory
 - **lint**: start tslint for project files
 - **test**: start unit tests
 - **test:ci**: start test in CI environment
