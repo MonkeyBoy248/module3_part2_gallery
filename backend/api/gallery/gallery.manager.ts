@@ -8,13 +8,9 @@ export class GalleryManager {
   }
 
   getPictures = async (page: string,  limit: string, filter: string, email: string) => {
-    try {
-      const queryParams = await this.service.validateAndConvertParams(page, limit, filter, email);
+    const queryParams = await this.service.validateAndConvertParams(page, limit, filter, email);
 
-      return this.service.getPictures(queryParams.page, queryParams.limit, queryParams.filter, email);
-    } catch {
-      return this.service.getPictures(1, 3, false, email);
-    }
+    return this.service.getPictures(queryParams.page, queryParams.limit, queryParams.filter, email);
   }
 
   uploadPicture = async (data: string, email: string) => {

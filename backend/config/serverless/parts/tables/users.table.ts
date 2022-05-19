@@ -45,6 +45,10 @@ export const usersTableConfig: AWSPartitial = {
               AttributeName: 'SK',
               AttributeType: 'S',
             },
+            {
+              AttributeName: 'fileOrigin',
+              AttributeType: 'S'
+            }
           ],
           KeySchema: [
             {
@@ -56,24 +60,24 @@ export const usersTableConfig: AWSPartitial = {
               KeyType: 'RANGE',
             },
           ],
-          // GlobalSecondaryIndexes: [
-          //   {
-          //     IndexName: 'InvertedIndexes',
-          //     KeySchema: [
-          //       {
-          //         AttributeName: 'sortKey',
-          //         KeyType: 'HASH',
-          //       },
-          //       {
-          //         AttributeName: 'primaryKey',
-          //         KeyType: 'RANGE',
-          //       },
-          //     ],
-          //     Projection: {
-          //       ProjectionType: 'ALL',
-          //     },
-          //   },
-          // ],
+          GlobalSecondaryIndexes: [
+            {
+              IndexName: 'AllUserPicturesIndex',
+              KeySchema: [
+                {
+                  AttributeName: 'fileOrigin',
+                  KeyType: 'HASH',
+                },
+                {
+                  AttributeName: 'SK',
+                  KeyType: 'RANGE',
+                },
+              ],
+              Projection: {
+                ProjectionType: 'ALL',
+              },
+            },
+          ],
           BillingMode: 'PAY_PER_REQUEST',
           TableName: '${self:custom.tablesNames.UsersTable.${self:provider.stage}}',
           StreamSpecification: {

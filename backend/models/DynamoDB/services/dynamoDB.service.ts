@@ -73,12 +73,18 @@ export class DynamoDBService {
     return this.dynamoDocumentClient.send(new GetCommand(params))
   }
 
-  queryItems = async (tableName: string, keyConditionExpression: string, expressionAttributeValues: ExpressionAttributeValue) => {
+  queryItems = async (tableName: string, keyConditionExpression: string, expressionAttributeValues: ExpressionAttributeValue, indexName?: string) => {
     const params: QueryCommandInput = {
       TableName: tableName,
       KeyConditionExpression: keyConditionExpression,
-      ExpressionAttributeValues: expressionAttributeValues
+      ExpressionAttributeValues: expressionAttributeValues,
     }
+
+    if (indexName) {
+      params.IndexName = indexName;
+    }
+
+    console.log('i', params.IndexName);
 
     return this.dynamoDocumentClient.send(new QueryCommand(params));
   }

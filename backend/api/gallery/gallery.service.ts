@@ -1,9 +1,11 @@
-import {DynamoDBPicturesService} from "@models/DynamoDB/services/dynamoDBPictures.service";
+import {DynamoDBPicturesService, PictureResponse} from "@models/DynamoDB/services/dynamoDBPictures.service";
 import { GalleryObject, QueryObject } from "./gallery.interface";
-import { HttpBadRequestError, HttpInternalServerError } from "@floteam/errors";
+import {HttpBadRequestError, HttpInternalServerError, HttpUnprocessableEntityError} from "@floteam/errors";
 import {S3Service} from "@services/S3.service";
 import {getEnv} from "@helper/environment";
 import {v4 as uuidv4} from "uuid";
+import {singleKindOfElementCheck} from "@helper/checkDuplicates";
+import {HttpError} from "@floteam/errors/http/http-error";
 
 export interface PictureMetadata {
   name: string,
@@ -15,6 +17,8 @@ export interface PictureMetadata {
   }
 }
 
+type OriginInfo = Pick<PictureResponse, 'email' | 'name'>;
+
 export class GalleryService {
   private dbPicturesService = new DynamoDBPicturesService();
   private s3Service = new S3Service();
@@ -24,7 +28,7 @@ export class GalleryService {
     const pageNumber = parseInt(page, 10);
     const limitNumber = parseInt(limit, 10);
     const filterBool = filter === 'false';
-    const totalPagesAmount = await this.countTotalPagesAmount(limitNumber, filterBool, email)
+    const totalPagesAmount = (await this.getPictureDataAndPagesAmount(limitNumber, filterBool, email)).total;
 
     if (isNaN(pageNumber) || isNaN(limitNumber)) {
       throw new HttpBadRequestError('Page or limit value is not a number');
@@ -34,7 +38,7 @@ export class GalleryService {
       throw new HttpBadRequestError('Invalid query parameters');
     }
 
-    if (pageNumber < 1 || pageNumber > totalPagesAmount) {
+    if ((pageNumber < 1 || pageNumber > totalPagesAmount) && totalPagesAmount !== 0) {
       throw new HttpBadRequestError('Invalid page number');
     }
 
@@ -45,29 +49,48 @@ export class GalleryService {
     } as QueryObject
   }
 
-  private countTotalPagesAmount = async (limit: number, filter: boolean, email:string): Promise<number> => {
+  private getPictureDataAndPagesAmount = async (limit: number, filter: boolean, email:string) => {
     try {
       const picturesPerPage = limit;
-      const picturesTotal = await this.dbPicturesService.getAllImages(email);
-      const totalPages: number = Math.ceil(picturesTotal?.length / picturesPerPage);
+      const picturesTotal = !filter ? await this.dbPicturesService.getAllPictures(email) : await this.dbPicturesService.getAllPictures();
+      const totalPages = Math.ceil(picturesTotal!.length / picturesPerPage);
 
-      console.log('total', totalPages);
-
-      return totalPages;
+      return {
+        total: totalPages,
+        pictures: picturesTotal
+      }
     } catch (err) {
       throw new HttpInternalServerError('Failed to get pictures amount');
     }
   }
 
+  private createResponseObject = async (array: PictureResponse[], limit: number, page: number, email: string, originInfo: OriginInfo[]) => {
+    const isSingleKind = singleKindOfElementCheck(array, 'email');
+    const picturesForTargetPage = array!.slice((page - 1) * limit, page * limit);
+
+    return Promise.all(
+      picturesForTargetPage.map((picture, index) => {
+          const checkPattern: boolean = isSingleKind && originInfo.find((item) => item.email === email) !== undefined;
+
+          return this.s3Service.getPreSignedGetUrl(`${checkPattern ? email : originInfo[index].email}/${checkPattern ? picture.name : originInfo[index].name}`, this.picturesBucketName)
+        }))
+  }
+
   getPictures = async (page: number, limit: number, filter: boolean, email: string): Promise<GalleryObject> => {
     try {
-      const pictures = await this.dbPicturesService.getAllImages(email);
-      const total = await this.countTotalPagesAmount(limit, filter, email);
-      const objects = await Promise.all(
-        pictures.slice((page - 1) * limit, page * limit)
-          .map((picture) => {
-        return this.s3Service.getPreSignedGetUrl(`${email}/${picture.name}`, this.picturesBucketName)
-      }))
+      const picturesInfo = await this.getPictureDataAndPagesAmount(limit, filter, email);
+      const pictures = picturesInfo.pictures;
+      const originInfo: OriginInfo[] = pictures!.map((picture) => {
+        return {
+          email: picture.email,
+          name: picture.name
+        }
+      });
+      console.log('origin', originInfo);
+      const total = picturesInfo.total;
+      const objects = total !== 0 ? await this.createResponseObject(pictures!, limit, page, email, originInfo) : [];
+
+      console.log('objects', objects);
 
       return  {
         objects,

@@ -7,8 +7,9 @@ export interface PictureResponse {
   partitionKey: string,
   sortKey: string,
   name: string,
+  email: string,
   metadata: any;
-  dateOfCreation: string;
+  dateOfUploading: string;
   status: string;
 }
 
@@ -23,23 +24,50 @@ export class DynamoDBPicturesService {
     const sortKey = createKeyTemplate(this.imagePrefix, pictureId);
     const attributes = {
       name: pictureId,
+      email,
       metadata,
-      dateOfUploading: new Date().toLocaleDateString()
+      dateOfUploading: new Date().toLocaleDateString(),
+      fileOrigin: 'Uploaded'
     }
 
     await this.dynamoDBService.putItem(this.userTableName, partitionKey, sortKey, attributes)
   }
 
-  getAllImages = async (email: string) => {
-    const userKey = createKeyTemplate(this.userPrefix, email);
-    const keyConditionExpression = `PK = :u AND begins_with(SK, :i)`;
+  getAllPictures = async (email?: string) => {
+    const partitionKey = email ? createKeyTemplate(this.userPrefix, email) : 'Uploaded';
+    const partitionKeyName = email ? 'PK' : 'fileOrigin';
+    const indexName = email ? undefined : 'AllUserPicturesIndex';
+
+    const keyConditionExpression = `${partitionKeyName} = :u AND begins_with(SK, :i)`;
     const expressionAttributeValues = {
-      ':u': `${userKey}`,
+      ':u': `${partitionKey}`,
       ':i': `${this.imagePrefix}#`
     }
 
-    const pictures = await this.dynamoDBService.queryItems(this.userTableName, keyConditionExpression, expressionAttributeValues);
+    try {
+      const pictures = !indexName ?
+        await this.dynamoDBService.queryItems(this.userTableName, keyConditionExpression, expressionAttributeValues)
+        :
+        await this.dynamoDBService.queryItems(this.userTableName, keyConditionExpression, expressionAttributeValues, indexName);
 
-    return pictures.Items ? pictures.Items as PictureResponse[]: [];
+      console.log('pictures', pictures.Items);
+
+      return pictures.Items ? pictures.Items as PictureResponse[]: [];
+    } catch (e) {
+      console.log('err', e)
+    }
   }
+
+  // getAllUserPictures = async () => {
+  //   const partitionKey = 'uploaded';
+  //   const keyConditionExpression = `status = :u AND begins_with(SK, :i)`;
+  //   const expressionAttributeValues = {
+  //     ':u': `${partitionKey}`,
+  //     ':i': `${this.imagePrefix}#`
+  //   }
+  //   const indexName = 'AllUserPicturesIndex';
+  //   const pictures = await this.dynamoDBService.queryItems(this.userTableName, keyConditionExpression, expressionAttributeValues, indexName);
+  //
+  //   return pictures.Items ? pictures.Items as PictureResponse[]: [];
+  // }
 }
