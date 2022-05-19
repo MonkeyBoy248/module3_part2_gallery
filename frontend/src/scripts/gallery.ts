@@ -14,7 +14,7 @@ const galleryErrorContainer = document.querySelector('.gallery__error') as HTMLE
 const galleryPopup = document.querySelector('.gallery__error-pop-up') as HTMLElement;
 const galleryLinkTemplate = document.querySelector('.gallery__link-template') as HTMLTemplateElement;
 const galleryUploadForm = document.querySelector('.header__upload-form') as HTMLFormElement;
-const uploadWrapper = document.querySelector('.header__upload-wrapper') as HTMLElement;
+const gallerySubmitButton = document.querySelector('.header__upload-submit-button') as HTMLButtonElement;
 const galleryUploadLabel = galleryUploadForm.querySelector('.header__upload-label') as HTMLElement;
 const galleryUploadInput = galleryUploadForm.querySelector('.header__upload-input') as HTMLInputElement;
 const headerLimitInput = document.querySelector('.header__limit-input') as HTMLInputElement;
@@ -148,13 +148,15 @@ async function sendUserPicture () {
     return false;
   }
 
-
   try {
+    styleUploadingButton('Processing', true, false);
+
     const response = await fetch(url, {
       method: 'PUT',
       body: file
     })
 
+    styleUploadingButton('Upload file', false, true);
 
     const responseStatus = response.status;
 
@@ -167,6 +169,19 @@ async function sendUserPicture () {
   } catch (err) {
     console.log(err);
   }
+}
+
+function styleUploadingButton (value: string, disabled: boolean, clear: boolean) {
+  gallerySubmitButton.value = value;
+  gallerySubmitButton.disabled = disabled;
+
+  if (!clear) {
+    gallerySubmitButton.classList.add('processing');
+
+    return;
+  }
+
+  gallerySubmitButton.classList.remove('processing');
 }
 
 async function getFileMetadata (file: File) {
@@ -186,7 +201,7 @@ async function getFileMetadata (file: File) {
 }
 
 async function getPictureParams (file: File) {
-  return new Promise<PictureDimensions>((resolve, reject) => {
+  return new Promise<PictureDimensions>((resolve) => {
     const reader = new FileReader();
 
     reader.onload = async (e: any) => {

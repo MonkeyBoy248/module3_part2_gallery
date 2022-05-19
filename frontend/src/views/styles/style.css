@@ -156,6 +156,10 @@ body {
   background-color: #d059e7;
 }
 
+.header__upload-submit-button.processing {
+  background-color: rgba(222, 68, 68, 0.6);
+}
+
 .header__files-container {
   margin-top: 20px;
 }
