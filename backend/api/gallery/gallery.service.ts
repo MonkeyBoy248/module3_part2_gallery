@@ -4,7 +4,7 @@ import {HttpBadRequestError, HttpInternalServerError} from "@floteam/errors";
 import {S3Service} from "@services/S3.service";
 import {getEnv} from "@helper/environment";
 import {v4 as uuidv4} from "uuid";
-import {singleKindOfElementCheck} from "@helper/checkDuplicates";
+import {werePicturesUploadedByASingleUser} from "@helper/checkDuplicates";
 
 export interface PictureMetadata {
   name: string,
@@ -16,7 +16,7 @@ export interface PictureMetadata {
   }
 }
 
-type OriginInfo = Pick<PictureResponse, 'email' | 'name'>;
+export type OriginInfo = Pick<PictureResponse, 'email' | 'name'>;
 
 export class GalleryService {
   private dbPicturesService = new DynamoDBPicturesService();
@@ -64,7 +64,7 @@ export class GalleryService {
   }
 
   private createResponseObject = async (array: OriginInfo[], limit: number, page: number, email: string) => {
-    const isSingleKind = singleKindOfElementCheck(array, 'email');
+    const isSingleKind = werePicturesUploadedByASingleUser(array, 'email');
     const picturesForTargetPage = array!.slice((page - 1) * limit, page * limit);
 
     console.log('target page', picturesForTargetPage, page, limit);
