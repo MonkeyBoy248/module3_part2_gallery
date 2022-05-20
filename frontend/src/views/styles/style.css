@@ -139,6 +139,11 @@ body {
   background-color: #e9982d;
 }
 
+.header__set-limit-button.invalid {
+  background-color: rgba(215, 41, 41, 0.6);
+  cursor: auto;
+}
+
 .header__upload-wrapper {
   display: flex;
   flex-direction: column;

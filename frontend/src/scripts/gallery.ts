@@ -28,7 +28,8 @@ const galleryEventsArray: CustomEventListener[] = [
   {target: galleryUploadForm, type: 'submit', handler: uploadUserFile},
   {target: galleryUploadInput, type: 'change', handler: showSelectedFilePath},
   {target: setLimitButton, type: 'click', handler: setLimit},
-  {target: filterCheckbox, type: 'change', handler: addFilterValueToURL}
+  {target: filterCheckbox, type: 'change', handler: addFilterValueToURL},
+  {target: headerLimitInput, type: 'input', handler: validateLimitValue}
 ]
 
 interface Metadata {
@@ -405,13 +406,21 @@ function setPageNumber () {
   }
 }
 
-function setLimit () {
-  const currentLimitValue = headerLimitInput.value;
+function validateLimitValue () {
+  const limitValue = headerLimitInput.value;
 
- isNaN(Number(currentLimitValue)) ?
-   env.currentUrl.searchParams.set('limit', '4')
-   :
-   env.currentUrl.searchParams.set('limit', currentLimitValue);
+  setLimitButton.disabled = false;
+  setLimitButton.classList.remove('invalid');
+
+  if ((Number(limitValue) < 1 || isNaN(Number(limitValue))) && limitValue !== '') {
+    setLimitButton.disabled = true;
+    setLimitButton.classList.add('invalid');
+  }
+}
+
+function setLimit () {
+  const limitValue = headerLimitInput.value
+
 
   setNewUrl();
 }
@@ -480,6 +489,7 @@ galleryErrorContainer.addEventListener('click', redirectToTheTargetPage);
 galleryUploadForm.addEventListener('submit', uploadUserFile);
 galleryUploadInput.addEventListener('change', processFileInfo);
 setLimitButton.addEventListener('click', setLimit);
+headerLimitInput.addEventListener('input', validateLimitValue);
 filterCheckbox.addEventListener('change', addFilterValueToURL);
 
 
