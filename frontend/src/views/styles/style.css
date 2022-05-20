@@ -50,6 +50,34 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin-bottom: 20px;
+}
+
+.header__user-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.header__user-icon {
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+}
+
+.header__user-icon img {
+  width: 100%;
+  height: 100%;
+}
+
+.header__current-user-email {
+  font-size: 16px;
+}
+
+.header__controls__wrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
 }
 
 .header__limit-wrapper {

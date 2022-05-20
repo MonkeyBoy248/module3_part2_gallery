@@ -20,8 +20,9 @@ const galleryUploadInput = galleryUploadForm.querySelector('.header__upload-inpu
 const headerLimitInput = document.querySelector('.header__limit-input') as HTMLInputElement;
 const setLimitButton = document.querySelector('.header__set-limit-button') as HTMLButtonElement;
 const filterCheckbox = document.querySelector('.header__filter-checkbox') as HTMLInputElement;
+const currentUserEmailOutput = document.querySelector('.header__current-user-email') as HTMLOutputElement;
 const galleryEventsArray: CustomEventListener[] = [
-  {target: document, type: 'DOMContentLoaded', handler: setCurrentPageUrl},
+  {target: document, type: 'DOMContentLoaded', handler: setInitialInformation},
   {target: pagesLinksList, type: 'click', handler: changeCurrentPage},
   {target: galleryErrorContainer, type: 'click', handler: redirectToTheTargetPage},
   {target: galleryUploadForm, type: 'submit', handler: uploadUserFile},
@@ -215,6 +216,19 @@ async function getPictureParams (file: File) {
     reader.readAsDataURL(file);
   })
 }
+
+function getUserEmail () {
+  const tokenObject = Token.getToken();
+
+  if (tokenObject) {
+    const token = tokenObject.token;
+    const tokenPayload = token.split('.')[1];
+    const userEmail = atob(tokenPayload).match(/\w+@\w+\.\w+/g);
+
+    return userEmail![0];
+  }
+}
+
 
 function checkTokenValidity () {
   setInterval(() => {
@@ -449,7 +463,18 @@ function setCurrentCheckboxValue () {
   filterCheckbox.checked = env.currentUrl.searchParams.get('filter') !== 'false';
 }
 
-document.addEventListener('DOMContentLoaded', getPicturesData);
+function displayUserEmail () {
+  const email = getUserEmail();
+
+  currentUserEmailOutput.textContent = email!;
+}
+
+async function setInitialInformation () {
+  displayUserEmail();
+  await getPicturesData();
+}
+
+document.addEventListener('DOMContentLoaded', setInitialInformation);
 pagesLinksList.addEventListener('click', changeCurrentPage);
 galleryErrorContainer.addEventListener('click', redirectToTheTargetPage);
 galleryUploadForm.addEventListener('submit', uploadUserFile);
