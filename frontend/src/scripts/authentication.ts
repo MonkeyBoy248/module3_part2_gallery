@@ -12,8 +12,8 @@ const submitButton = loginForm?.elements.namedItem("submit") as HTMLButtonElemen
 const submitErrorContainer = loginForm?.querySelector('.login-form__submit-error-message');
 const signUpButton = loginForm?.querySelector('.login-form__signup-button') as HTMLButtonElement;
 const authenticationEventsArray: CustomEventListener[] = [
-  {target: emailInput, type: 'input', handler: validateEmailInput},
-  {target: passwordInput, type: 'change', handler: validatePasswordInput},
+  {target: emailInput, type: 'input', handler: validateInput},
+  {target: passwordInput, type: 'change', handler: validateInput},
   {target: loginForm as HTMLElement, type: 'submit', handler: submitForm},
   {target: loginForm as HTMLElement, type: 'focusin', handler: resetErrorMessage},
   {target: signUpButton as HTMLElement, type: 'click', handler: sendSignUpRequest},
@@ -98,18 +98,18 @@ async function sendSignUpRequest () {
 
 }
 
-function validateEmailInput(): void {
-  const message = 'Wrong email format. Please, try again';
-  const pattern = /[\w\d-_]+@([\w_-]+\.)+[\w]+/;
+function validateInput(e: Event): void {
+  const target = e.target as HTMLInputElement;
 
-  validateField(emailInput, pattern, message);
-}
+  const wrongEmailFormatMessage = 'Wrong email format. Please, try again';
+  const wrongPasswordFormatMessage = 'Wrong password format. Please, try again';
+  const emailPattern = /[\w\d-_]+@([\w_-]+\.)+[\w]+/;
+  const passwordPattern = /([a-zA-Z0-9]{8,})/;
 
-function validatePasswordInput(): void {
-  const message = 'Wrong password format. Please, try again';
-  const pattern = /([a-zA-Z0-9]{8,})/;
+  const message = target === emailInput ? wrongEmailFormatMessage : wrongPasswordFormatMessage;
+  const pattern = target === emailInput ? emailPattern : passwordPattern;
 
-  validateField(passwordInput, pattern, message);
+  validateField(target, pattern, message);
 }
 
 function setTokenAndRedirect (response: TokenObject) {
@@ -145,8 +145,8 @@ function resetErrorMessage() {
   submitErrorContainer!.textContent = '';
 }
 
-emailInput.addEventListener('input', validateEmailInput);
-passwordInput.addEventListener('change', validatePasswordInput);
+emailInput.addEventListener('input', validateInput);
+passwordInput.addEventListener('change', validateInput);
 loginForm!.addEventListener('submit', submitForm);
 loginForm!.addEventListener('focusin', resetErrorMessage);
 signUpButton.addEventListener('click', sendSignUpRequest);
