@@ -9,14 +9,16 @@ jspm_packages
 .scannerwork/
 
 # Serverless directories
-.serverless/
-.build/
-kms_key.yml
-.env
+backend/.serverless/
+backend/.build/
+backend/kms_key.yml
+backend/.env
 **/.env
 **/api/**.js
-.nyc_output/
-typings/
-documentation/
-coverage/
-.esbuild/
+backend/.nyc_output/
+backend/typings/
+backend/documentation/
+backend/coverage/
+backend/.esbuild/
+/frontend/src/views/modules/
+/frontend/src/views/scripts/
